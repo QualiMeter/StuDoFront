@@ -1,6 +1,6 @@
-const IS_LOCALHOST = true;
+const IS_LOCALHOST = false;
 const PORT = 5245;
-const BASE_URL = IS_LOCALHOST ? `http://localhost:${PORT}` : 'https://studoback.up.railway.app/';
+const BASE_URL = IS_LOCALHOST ? `http://localhost:${PORT}` : 'https://studoback.up.railway.app';
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = localStorage.getItem('token');

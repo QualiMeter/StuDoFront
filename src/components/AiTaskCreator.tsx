@@ -67,27 +67,36 @@ export function AiTaskCreator({ isOpen, onClose, onTaskCreated }: { isOpen: bool
 	const [modelName, setModelName] = useState('meta-llama/llama-3.3-70b-instruct');
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
-	// Фиксация скролла и закрытие по Escape
+	// Блокировка скролла и закрытие по Escape
 	useEffect(() => {
 		if (!isOpen) return;
+
 		const handleEsc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
 		window.addEventListener('keydown', handleEsc);
+
+		// Компенсация исчезновения скроллбара (убирает белую полосу/сдвиг)
+		const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 		document.body.style.overflow = 'hidden';
+		document.body.style.paddingRight = `${scrollbarWidth}px`;
+
 		return () => {
 			window.removeEventListener('keydown', handleEsc);
 			document.body.style.overflow = '';
+			document.body.style.paddingRight = '';
 		};
 	}, [isOpen, onClose]);
 
-	// Инициализация при открытии
 	useEffect(() => {
 		if (isOpen && messages.length === 0) {
 			fetchAiConfig();
-			setMessages([{ id: crypto.randomUUID(), role: 'assistant', content: 'Привет! Опиши задачу, которую нужно создать, или попроси разбить тему на шаги. Я покажу план перед выполнением.' }]);
+			setMessages([{
+				id: crypto.randomUUID(),
+				role: 'assistant',
+				content: 'Привет! Опиши задачу, которую нужно создать, или попроси разбить тему на шаги. Я покажу план перед выполнением.'
+			}]);
 		}
 	}, [isOpen]);
 
-	// Автопрокрутка
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [messages, pendingAction]);
@@ -207,14 +216,18 @@ export function AiTaskCreator({ isOpen, onClose, onTaskCreated }: { isOpen: bool
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-			{/* Затемненный фон с закрытием по клику */}
-			<div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+		<div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+			{/* Затемненный фон */}
+			<div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-			{/* Само диалоговое окно */}
-			<div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] animate-enter">
+			{/* Диалоговое окно */}
+			<div
+				className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+				onClick={e => e.stopPropagation()}
+				style={{ animation: 'dialogIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+			>
 				{/* Шапка */}
-				<div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0">
+				<div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0 bg-white">
 					<div className="flex items-center gap-2">
 						<Bot className="text-indigo-600" size={20} />
 						<h3 className="font-bold text-gray-800">AI Конструктор Задач</h3>
@@ -280,6 +293,14 @@ export function AiTaskCreator({ isOpen, onClose, onTaskCreated }: { isOpen: bool
 					</div>
 				</div>
 			</div>
+
+			{/* Глобальная анимация для диалога (добавляется один раз) */}
+			<style>{`
+        @keyframes dialogIn {
+			from { opacity: 0; transform: scale(0.96) translateY(8px); }
+			to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+		`}</style>
 		</div>
 	);
 }

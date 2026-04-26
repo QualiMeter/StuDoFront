@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  Zap, Brain, Bell, ShieldCheck, Calendar, MessageSquare,
+  Brain, Bell, ShieldCheck, Calendar, MessageSquare,
   ArrowRight, CheckCircle, Sparkles, Smartphone, Clock, Layers
 } from 'lucide-react';
 
@@ -10,9 +10,6 @@ export function LandingPage() {
   return (
     <div className="pt-28 pb-16 px-4 max-w-6xl mx-auto">
       <section className="text-center mb-20">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-4">
-          <Zap size={14} /> Открытый бета-релиз v1.0
-        </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
           Управляй дедлайнами.<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">Делегируй рутину ИИ.</span>

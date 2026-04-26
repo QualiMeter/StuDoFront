@@ -66,11 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				surname: data.surname,
 				name: data.name,
 				patronym: data.patronym || null,
-				birth_date: data.birth_date || null, // 👈 Исправлено
+				birth_date: data.birth_date || null,
 				email: data.email,
 				password: data.password,
-				notifications: data.notifications,
-				tg_username: data.tg_username || null
+				timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
 			})
 		});
 		const token = typeof res === 'string' ? res : (res?.token || res?.accessToken);

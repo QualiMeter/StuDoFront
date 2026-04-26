@@ -98,15 +98,16 @@ export function FloatingIsland() {
 }
 
 function AuthForm({ activeTab, onSubmit }: { activeTab: AuthTab; onSubmit: any }) {
-	const [form, setForm] = useState({ email: '', password: '', name: '', surname: '', patronym: '', birthday: '' });
+	const [form, setForm] = useState({ email: '', password: '', name: '', surname: '', patronym: '', birth_date: '' });
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault(); setError(''); setLoading(true);
 		try {
+			const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 			if (activeTab === 'login') await onSubmit(form.email, form.password);
-			else await onSubmit({ ...form, birthday: form.birthday || undefined, patronym: form.patronym || undefined });
+			else await onSubmit({ ...form, birth_date: form.birth_date || null, patronym: form.patronym || null, timezone });
 		} catch (err: any) { setError(err.message || 'Ошибка'); }
 		finally { setLoading(false); }
 	};
@@ -118,7 +119,7 @@ function AuthForm({ activeTab, onSubmit }: { activeTab: AuthTab; onSubmit: any }
 					<input required placeholder="Фамилия" className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 transition" value={form.surname} onChange={e => setForm({ ...form, surname: e.target.value })} />
 					<input required placeholder="Имя" className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 transition" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
 					<input placeholder="Отчество" className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 transition" value={form.patronym} onChange={e => setForm({ ...form, patronym: e.target.value })} />
-					<input type="date" className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 transition" value={form.birthday} onChange={e => setForm({ ...form, birthday: e.target.value })} />
+					<input type="date" className="p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 transition" value={form.birth_date} onChange={e => setForm({ ...form, birth_date: e.target.value })} />
 				</div>
 			)}
 			<div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:border-indigo-300 transition">

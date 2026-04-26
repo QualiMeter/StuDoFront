@@ -4,9 +4,10 @@ export interface User {
 	name: string;
 	surname: string;
 	patronym?: string;
-	birth_date?: string; // 👈 Было birthday
-	notifications: boolean; // 👈 Новое поле
-	tg_username?: string; // 👈 Новое поле
+	birth_date?: string;
+	notifications: boolean;
+	tg_username?: string;
+	timezone: string;
 }
 
 export interface ChatMessage {
@@ -31,7 +32,6 @@ export interface LoginRequest {
 	password: string;
 }
 
-// 👇 Обновлён под новые поля
 export interface RegisterRequest {
 	surname: string;
 	name: string;
@@ -41,9 +41,9 @@ export interface RegisterRequest {
 	password: string;
 	notifications?: boolean;
 	tg_username?: string;
+	timezone: string;
 }
 
-// 👇 Отдельный тип для обновления профиля (все поля опциональны)
 export interface UpdateProfileRequest {
 	surname?: string;
 	name?: string;
@@ -53,4 +53,5 @@ export interface UpdateProfileRequest {
 	password?: string;
 	notifications?: boolean;
 	tg_username?: string | null;
+	timezone: string;
 }

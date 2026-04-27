@@ -23,7 +23,31 @@ export function TasksPage() {
 	const [modelName, setModelName] = useState('meta-llama/llama-3.3-70b-instruct');
 	const aiEndRef = useRef<HTMLDivElement>(null);
 
-	const AI_TOOLS = [{ type: 'function' as const, function: { name: 'proposeTask', description: 'Формирует структуру задачи и подзадач.', parameters: { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' }, deadline: { type: 'string' }, priority: { type: 'string', enum: ['low', 'medium', 'high'] }, subtasks: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' } }, required: ['title'] } } }, required: ['title', 'deadline', 'priority', 'subtasks'] } } }];
+	// 🔹 Инструмент ИИ с более строгим описанием
+	const AI_TOOLS = [
+		{
+			type: 'function' as const,
+			function: {
+				name: 'createTaskProposal',
+				description: 'Используй этот инструмент ТОЛЬКО когда у тебя есть Название, Дедлайн, Приоритет и Подзадачи. Он сформирует предложение для пользователя.',
+				parameters: {
+					type: 'object',
+					properties: {
+						title: { type: 'string', description: 'Название задачи' },
+						description: { type: 'string', description: 'Описание задачи' },
+						deadline: { type: 'string', description: 'Дедлайн в формате YYYY-MM-DD' },
+						priority: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Приоритет' },
+						subtasks: {
+							type: 'array',
+							items: { type: 'object', properties: { title: { type: 'string' } }, required: ['title'] },
+							description: 'Список подзадач'
+						}
+					},
+					required: ['title', 'deadline', 'priority', 'subtasks']
+				}
+			}
+		}
+	];
 
 	const loadTasks = useCallback(async () => {
 		try {
@@ -42,7 +66,7 @@ export function TasksPage() {
 				if (k.status === 'fulfilled' && k.value) setApiKey(k.value);
 				if (m.status === 'fulfilled' && m.value) setModelName(m.value);
 			});
-			setAiMessages([{ id: crypto.randomUUID(), role: 'assistant', content: 'Привет! Опиши задачу. Я соберу данные, сформирую план с подзадачами и создам только после твоего подтверждения.' }]);
+			setAiMessages([{ id: crypto.randomUUID(), role: 'assistant', content: 'Привет! Опиши задачу. Я соберу данные, сформирую план с подзадачами и создам её только после твоего подтверждения.' }]);
 		}
 	}, [isDrawerOpen, drawerMode]);
 
@@ -76,17 +100,34 @@ export function TasksPage() {
 		const history = [...aiMessages.map(m => ({ role: m.role, content: m.content })), { role: 'user', content: userMsg.content }];
 		try {
 			const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-				method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': window.location.origin, 'X-Title': 'StuDo' },
-				body: JSON.stringify({ model: modelName, messages: [{ role: 'system', content: 'Отвечай на двух языках: 🇷🇺 RU / 🇬🇧 EN. Используй proposeTask только когда собраны данные. Не создавай задачи напрямую.' }, ...history], tools: AI_TOOLS, tool_choice: 'auto' })
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': window.location.origin, 'X-Title': 'StuDo' },
+				body: JSON.stringify({
+					model: modelName,
+					messages: [
+						{
+							// 🔹 Обновленный строгий промпт
+							role: 'system',
+							content: 'Ты ассистент по планированию задач. Отвечай на двух языках: 🇷🇺 RU / 🇬🇧 EN. Твоя цель — собрать данные (Название, Дедлайн, Приоритет, Подзадачи) и вызвать инструмент createTaskProposal. НЕ пиши "готово" или план текстом. Как только данные собраны, ты ОБЯЗАН вызвать инструмент.'
+						},
+						...history
+					],
+					tools: AI_TOOLS,
+					tool_choice: 'auto'
+				})
 			});
 			const data = await res.json();
 			if (data.usage) logAiRequest({ model: modelName, promptTokens: data.usage.prompt_tokens, completionTokens: data.usage.completion_tokens, totalTokens: data.usage.total_tokens, status: 'success' });
 			const msg = data.choices?.[0]?.message;
+
+			// Проверяем вызов инструмента
 			if (msg?.tool_calls?.[0]) {
 				const args = JSON.parse(msg.tool_calls[0].function.arguments);
 				setPendingProposal(args);
 				setAiMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: '', proposal: args }]);
-			} else setAiMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: msg?.content || 'Готово.' }]);
+			} else {
+				setAiMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: msg?.content || 'Готово.' }]);
+			}
 		} catch (err: any) {
 			logAiRequest({ model: modelName, status: 'error', errorMessage: err.message });
 			setAiMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: 'Ошибка соединения.' }]);
@@ -96,14 +137,32 @@ export function TasksPage() {
 	const executeProposal = async (confirm: boolean) => {
 		if (!pendingProposal) return;
 		setAiLoading(true);
-		let resultMsg = confirm ? '✅ Создано.' : '❌ Отменено.';
+		let resultMsg = confirm ? '✅ Задача и подзадачи успешно созданы.' : '❌ Создание отменено.';
+
 		if (confirm) {
 			try {
-				const task = await createTask({ title: pendingProposal.title, description: pendingProposal.description || null, deadline: new Date(pendingProposal.deadline).toISOString(), priority: pendingProposal.priority, status: 'todo' });
-				for (const st of (pendingProposal.subtasks || [])) await createSubtask({ id: crypto.randomUUID(), taskId: task.id, title: st.title, isCompleted: false, sortOrder: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+				const task = await createTask({
+					title: pendingProposal.title,
+					description: pendingProposal.description || null,
+					deadline: new Date(pendingProposal.deadline).toISOString(),
+					priority: pendingProposal.priority,
+					status: 'todo'
+				});
+				for (const st of (pendingProposal.subtasks || [])) {
+					await createSubtask({
+						id: crypto.randomUUID(),
+						taskId: task.id,
+						title: st.title,
+						isCompleted: false,
+						sortOrder: 0,
+						createdAt: new Date().toISOString(),
+						updatedAt: new Date().toISOString()
+					});
+				}
 				loadTasks();
-			} catch { resultMsg = '⚠️ Ошибка сервера.'; }
+			} catch { resultMsg = '⚠️ Ошибка при создании на сервере.'; }
 		}
+
 		setPendingProposal(null); setAiLoading(false);
 		setAiMessages(prev => [...prev.filter(m => !m.proposal), { id: crypto.randomUUID(), role: 'assistant', content: resultMsg }]);
 	};

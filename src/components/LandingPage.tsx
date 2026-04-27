@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Brain, Bell, ShieldCheck, Calendar, MessageSquare,
   ArrowRight, CheckCircle, Sparkles, Smartphone, Clock, Layers
@@ -6,6 +7,16 @@ import {
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth(); // Берём статус из того же контекста, что и FloatingIsland
+
+  const handleNavigate = () => {
+    if (isAuthenticated) {
+      navigate('/student/tasks');
+    } else {
+      // Перекидываем на главную с параметром, который откроет форму регистрации
+      navigate('/?showAuth=register');
+    }
+  };
 
   return (
     <div className="pt-28 pb-16 px-4 max-w-6xl mx-auto">
@@ -19,7 +30,7 @@ export function LandingPage() {
           прогресс считается автоматически, а напоминания приходят прямо в Telegram.
         </p>
         <button
-          onClick={() => navigate('/student/tasks')}
+          onClick={handleNavigate}
           className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200/50 transition transform hover:scale-105"
         >
           Начать бесплатно <ArrowRight size={18} />
@@ -42,6 +53,7 @@ export function LandingPage() {
           ))}
         </div>
       </section>
+
       <section className="mb-20 bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-3xl p-8 md:p-12">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Почему студенты выбирают StuDo?</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -110,7 +122,7 @@ export function LandingPage() {
           Перенесите все задачи в одно место. Пусть AI планирует, а вы — учитесь.
         </p>
         <button
-          onClick={() => navigate('/student/tasks')}
+          onClick={handleNavigate}
           className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-900 hover:bg-gray-100 rounded-xl font-semibold transition shadow-xl"
         >
           Открыть личный кабинет <ArrowRight size={18} />

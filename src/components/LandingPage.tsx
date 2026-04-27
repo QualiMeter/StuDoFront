@@ -110,7 +110,7 @@ export function LandingPage() {
           Перенесите все задачи в одно место. Пусть AI планирует, а вы — учитесь.
         </p>
         <button
-          onClick={() => navigate('/student/task')}
+          onClick={() => navigate('/student/tasks')}
           className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-900 hover:bg-gray-100 rounded-xl font-semibold transition shadow-xl"
         >
           Открыть личный кабинет <ArrowRight size={18} />

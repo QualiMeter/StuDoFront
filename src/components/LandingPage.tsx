@@ -1,9 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  Bot, Bell, ShieldCheck, Calendar, MessageSquare,
-  ArrowRight, CheckCircle, Sparkles, Smartphone, Clock, BarChart3
-} from 'lucide-react'; from 'lucide-react';
+import { Bot, Bell, ShieldCheck, Calendar, MessageSquare, ArrowRight, CheckCircle, Sparkles, Smartphone, Clock, BarChart3 } from 'lucide-react';
 
 export function LandingPage() {
   const navigate = useNavigate();

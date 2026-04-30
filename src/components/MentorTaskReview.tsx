@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { getTasks } from '../api/client';
 import type { Task } from '../types';
 import { CheckCircle2, XCircle, Clock, MessageSquare, Eye } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export function MentorTaskReview() {
 	const [tasks, setTasks] = useState<Task[]>([]);

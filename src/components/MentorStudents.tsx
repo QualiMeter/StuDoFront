@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { getAdminUsers } from '../api/client';
 import type { User } from '../types';
 import { Search, UserPlus, MessageSquare, BarChart2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export function MentorStudents() {
 	const [students, setStudents] = useState<User[]>([]);

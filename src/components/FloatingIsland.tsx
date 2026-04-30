@@ -1,34 +1,23 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useClickOutside } from '../hooks/useClickOutside';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { User, LogOut, ChevronDown, ArrowRight, Mail, Lock, LayoutDashboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, LogOut, ChevronDown, ArrowRight, Mail, Lock, LayoutDashboard, GraduationCap, School } from 'lucide-react';
 
 export function FloatingIsland() {
 	const { user, isAuthenticated, logout, login, register } = useAuth();
 	const navigate = useNavigate();
-	const [searchParams] = useSearchParams();
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 	const containerRef = useRef<HTMLDivElement>(null);
-
-	// 🔥 Автоматически открываем вкладку регистрации при переходе с лендинга
-	useEffect(() => {
-		const showAuth = searchParams.get('showAuth');
-		if (showAuth === 'register' && !isAuthenticated) {
-			setActiveTab('register');
-			setShowTooltip(true);
-			// Убираем параметр из URL, чтобы при обновлении страницы форма не открывалась снова
-			const newParams = new URLSearchParams(searchParams);
-			newParams.delete('showAuth');
-			navigate({ search: newParams.toString() }, { replace: true });
-		}
-	}, [searchParams, isAuthenticated, navigate]);
 
 	useClickOutside(containerRef, () => setShowTooltip(false));
 
 	const toggleTooltip = () => setShowTooltip(prev => !prev);
 
+	// 🔹 Адаптивные классы для тултипа:
+	// Мобильные: fixed по центру экрана (чтобы не вылезал за края)
+	// Десктоп (sm): absolute относительно родителя
 	const tooltipClasses = `
     fixed left-1/2 -translate-x-1/2 top-20 w-[95%] max-w-sm z-[60]
     sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:top-full sm:mt-3 sm:w-80 sm:max-w-none
@@ -67,6 +56,39 @@ export function FloatingIsland() {
 		);
 	}
 
+	// 🔹 Логика навигации для авторизованных пользователей
+	const getDashboardLink = () => {
+		switch (user.role) {
+			case 'admin': return '/admin';
+			case 'mentor': return '/mentor/dashboard';
+			default: return '/student/tasks';
+		}
+	};
+
+	const getProfileLink = () => {
+		switch (user.role) {
+			case 'admin': return '/admin/profile';
+			case 'mentor': return '/mentor/profile';
+			default: return '/student/profile';
+		}
+	};
+
+	const getDashboardLabel = () => {
+		switch (user.role) {
+			case 'admin': return 'Админ-панель';
+			case 'mentor': return 'Панель ментора';
+			default: return 'Мои задачи';
+		}
+	};
+
+	const getDashboardIcon = () => {
+		switch (user.role) {
+			case 'admin': return <LayoutDashboard size={16} />;
+			case 'mentor': return <School size={16} />;
+			default: return <User size={16} />;
+		}
+	};
+
 	return (
 		<div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
 			<div className="flex items-center justify-between px-5 py-3 bg-white/80 backdrop-blur-md border border-gray-200/60 rounded-2xl shadow-lg shadow-indigo-100/50">
@@ -88,12 +110,11 @@ export function FloatingIsland() {
 								<p className="font-medium text-gray-800 truncate">{user.name} {user.surname}</p>
 								<p className="text-xs text-gray-500 truncate">{user.email}</p>
 							</div>
-							{user.role === 'admin' ? (
-								<button onClick={() => navigate('/admin')} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition text-gray-700"><LayoutDashboard size={16} /> Админ-панель</button>
-							) : (
-								<button onClick={() => navigate('/student/tasks')} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition text-gray-700">Мои задачи</button>
-							)}
-							<button onClick={() => navigate(user.role === 'admin' ? '/admin/profile' : '/student/profile')} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition text-gray-700">Профиль</button>
+
+							<button onClick={() => navigate(getDashboardLink())} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition text-gray-700">
+								{getDashboardIcon()} {getDashboardLabel()}
+							</button>
+							<button onClick={() => navigate(getProfileLink())} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition text-gray-700">Профиль</button>
 							<button onClick={() => { logout(); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition text-red-600 border-t border-gray-100 mt-1"><LogOut size={16} /> Выйти</button>
 						</div>
 					</div>
@@ -103,6 +124,7 @@ export function FloatingIsland() {
 	);
 }
 
+// Форма авторизации/регистрации
 function AuthForm({ activeTab, onSubmit }: { activeTab: 'login' | 'register'; onSubmit: any }) {
 	const [form, setForm] = useState({ email: '', password: '', name: '', surname: '', patronym: '', birthDate: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 	const [error, setError] = useState('');
@@ -111,8 +133,16 @@ function AuthForm({ activeTab, onSubmit }: { activeTab: 'login' | 'register'; on
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault(); setError(''); setLoading(true);
 		try {
-			if (activeTab === 'login') await onSubmit(form.email, form.password);
-			else await onSubmit({ ...form, birthDate: form.birthDate || null, patronym: form.patronym || null, timezone: form.timezone || null });
+			if (activeTab === 'login') {
+				await onSubmit(form.email, form.password);
+			} else {
+				await onSubmit({
+					...form,
+					birthDate: form.birthDate || null,
+					patronym: form.patronym || null,
+					timezone: form.timezone || null
+				});
+			}
 		} catch (err: any) { setError(err.message || 'Ошибка'); }
 		finally { setLoading(false); }
 	};

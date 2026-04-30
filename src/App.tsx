@@ -1,63 +1,66 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FloatingIsland } from './components/FloatingIsland';
 import { LandingPage } from './components/LandingPage';
+import { ProtectedLayout } from './components/ProtectedLayout';
+import { AdminLayout } from './components/AdminLayout';
+import { MentorLayout } from './components/MentorLayout';
 import { TasksPage } from './components/TasksPage';
 import { TaskPage } from './components/TaskPage';
 import { CoursesPage } from './components/CoursesPage';
 import { ProfilePage } from './components/ProfilePage';
-import { ProtectedLayout } from './components/ProtectedLayout';
-import { AdminLayout } from './components/AdminLayout';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminUsers } from './components/AdminUsers';
-import type { UserRole } from './types';
 import { MentorDashboard } from './components/MentorDashboard';
-import { MentorLayout } from './components/MentorLayout';
 import { MentorStudents } from './components/MentorStudents';
 import { MentorTaskReview } from './components/MentorTaskReview';
+import type { UserRole } from './types';
 
-// Компонент для защиты ролей
 function RoleGuard({ allowedRoles, children }: { allowedRoles: UserRole[]; children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center text-gray-500">Загрузка...</div>;
-  if (!user || !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
+  if (!isAuthenticated || !user || !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
   return children;
 }
 
 function AppContent() {
-  const location = useLocation();
   return (
-    // Добавляем key для корректной работы с location если нужно, но без анимации переходов это опционально
-    <div key={location.pathname} className="relative min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/40 text-gray-900">
-      <Routes location={location}>
-        <Route path="/" element={<><FloatingIsland /><LandingPage /></>} />
+    <>
+      <FloatingIsland />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/40 pt-20 md:pt-4">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
 
-        <Route element={<RoleGuard allowedRoles={['student']}><ProtectedLayout /></RoleGuard>}>
-          <Route path="/student/tasks" element={<TasksPage />} />
-          <Route path="/student/tasks/:id" element={<TaskPage />} />
-          <Route path="/student/courses" element={<CoursesPage />} />
-          <Route path="/student/profile" element={<ProfilePage />} />
-        </Route>
+          <Route path="/student" element={<RoleGuard allowedRoles={['student']}><ProtectedLayout /></RoleGuard>}>
+            <Route index element={<Navigate to="tasks" replace />} />
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="tasks/:id" element={<TaskPage />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
 
-        <Route element={<RoleGuard allowedRoles={['mentor']}><MentorLayout /></RoleGuard>}>
-          <Route index path="/mentor" element={<Navigate to="/mentor/dashboard" replace />} />
-          <Route path="/mentor/dashboard" element={<MentorDashboard />} />
-          <Route path="/mentor/students" element={<MentorStudents />} />
-          <Route path="/mentor/review" element={<MentorTaskReview />} />
-          <Route path="/mentor/profile" element={<ProfilePage />} />
-        </Route>
+          <Route path="/admin" element={<RoleGuard allowedRoles={['admin']}><AdminLayout /></RoleGuard>}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
 
-        <Route path="/admin" element={<RoleGuard allowedRoles={['admin']}><AdminLayout /></RoleGuard>}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
+          <Route path="/mentor" element={<RoleGuard allowedRoles={['mentor']}><MentorLayout /></RoleGuard>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<MentorDashboard />} />
+            <Route path="students" element={<MentorStudents />} />
+            <Route path="review" element={<MentorTaskReview />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, ChevronDown, ArrowRight, Mail, Lock, LayoutDashboard, GraduationCap, School } from 'lucide-react';
+import { User, LogOut, ChevronDown, ArrowRight, Mail, Lock, LayoutDashboard, School } from 'lucide-react';
 
 export function FloatingIsland() {
 	const { user, isAuthenticated, logout, login, register } = useAuth();

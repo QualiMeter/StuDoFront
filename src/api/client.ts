@@ -53,6 +53,9 @@ export async function deleteCourse(id: string) { return apiFetch(`/api/Courses/$
 export async function getAdminUsers(search = '', page = 1, size = 20) {
 	return apiFetch<{ users: User[]; total: number }>(`/api/Admin/users?search=${search}&page=${page}&size=${size}`);
 }
+export async function getStudents() {
+	return apiFetch<{ users: User[]; total: number }>('/api/mentor/my-students');
+}
 export async function getAdminOverview() { return apiFetch('/api/Admin/analytics/overview'); }
 export async function getAdminTasksTrend(days = 7) { return apiFetch<TrendItem[]>(`/api/Admin/analytics/tasks-trend?days=${days}`); }
 export async function getAdminAiUsage(days = 7) { return apiFetch(`/api/Admin/analytics/ai-usage?days=${days}`); }

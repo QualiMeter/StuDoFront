@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAdminUsers } from '../api/client';
+import { getStudents } from '../api/client';
 import type { User } from '../types';
 import { Search, UserPlus, MessageSquare, BarChart2 } from 'lucide-react';
 
@@ -11,8 +11,8 @@ export function MentorStudents() {
 	useEffect(() => {
 		const t = setTimeout(async () => {
 			try {
-				const { users } = await getAdminUsers(search, 1, 50);
-				setStudents(users.filter(u => u.role === 'student'));
+				const { users } = await getStudents();
+				setStudents(users);
 			} catch { }
 			finally { setLoading(false); }
 		}, 300);

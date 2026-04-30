@@ -15,6 +15,7 @@ import { MentorDashboard } from './components/MentorDashboard';
 import { MentorStudents } from './components/MentorStudents';
 import { MentorTaskReview } from './components/MentorTaskReview';
 import type { UserRole } from './types';
+import { NotFoundPage } from './components/NotFoundPage';
 
 function RoleGuard({ allowedRoles, children }: { allowedRoles: UserRole[]; children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -62,7 +63,7 @@ function AppContent() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );

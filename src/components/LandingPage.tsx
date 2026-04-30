@@ -1,143 +1,84 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Bot, Bell, ShieldCheck, Calendar, MessageSquare, ArrowRight, CheckCircle, Sparkles, Smartphone, Clock, BarChart3 } from 'lucide-react';
+import { ScaleCarousel } from './ScaleCarousel';
+import { LiveStats } from './LiveStats';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  const handleNavigate = () => {
-    if (isAuthenticated) {
-      navigate('/student/tasks');
-    } else {
-      navigate('/?showAuth=register');
-    }
-  };
 
   return (
-    <div className="pt-24 sm:pt-28 pb-12 sm:pb-16 w-full">
-      {/* Единый контейнер для всей страницы - одинаковые отступы везде */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full">
-        
-        {/* HERO */}
-        <section className="text-center mb-12 sm:mb-20 w-full">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 sm:mb-6 leading-[1.15] sm:leading-tight">
-            Управляй дедлайнами.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">Делегируй рутину ИИ.</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-white overflow-hidden">
+
+      {/* 🔹 Hero Section */}
+      <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-4">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium mb-6">
+            <Sparkles size={12} /> ИИ-планировщик нового поколения
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 leading-tight mb-6">
+            Управляй учёбой <br />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">
+              без стресса и дедлайнов
+            </span>
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto text-base sm:text-lg md:text-xl mb-8 sm:mb-10 leading-relaxed">
-            StuDo — это не просто список задач. Это персональный учебный кабинет, где каждая задача помнит контекст,
-            прогресс считается автоматически, а напоминания приходят прямо в Telegram.
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
+            StuDo автоматически разбивает сложные задачи на шаги, отслеживает прогресс и синхронизирует уведомления с Telegram. Создан для студентов, оптимизирован для менторов.
           </p>
-          <button
-            onClick={handleNavigate}
-            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200/50 transition transform hover:scale-105 text-sm sm:text-base"
-          >
-            Начать бесплатно <ArrowRight size={18} />
-          </button>
-        </section>
-
-        {/* КАК РАБОТАЕТ */}
-        <section className="mb-12 sm:mb-20 w-full">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10">Как работает StuDo?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full">
-            {[
-              { step: '01', title: 'Создайте задачу', desc: 'Укажите предмет, дедлайн и приоритет. Система автоматически добавит её в календарь и расставит по важности.' },
-              { step: '02', title: 'Получите план от AI', desc: 'Встроенный ассистент разберёт тему, предложит структуру ответа, найдет формулы и поможет составить чек-лист.' },
-              { step: '03', title: 'Отслеживайте и сдавайте', desc: 'Прогресс обновляется в реальном времени. Если дедлайн близко — придёт мягкое напоминание в Telegram.' }
-            ].map((item, i) => (
-              <div key={i} className="relative p-5 sm:p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition w-full min-h-[180px] flex flex-col justify-center">
-                <span className="absolute top-3 left-4 text-5xl sm:text-6xl font-black text-indigo-50/80 select-none leading-none">
-                  {item.step}
-                </span>
-                <div className="relative z-10 mt-8 sm:mt-0 text-center sm:text-left">
-                  <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">{item.title}</h3>
-                  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onClick={() => navigate('/student/tasks')} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2">
+              Начать использовать <ArrowRight size={18} />
+            </button>
+            <button className="px-6 py-3 bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 rounded-xl font-medium transition shadow-sm">
+              Смотреть демо
+            </button>
           </div>
-        </section>
+        </div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl -z-10 pointer-events-none" />
+      </section>
 
-        {/* ПОЧЕМУ ВЫБИРАЮТ - БЕЗ ДОПОЛНИТЕЛЬНЫХ ОТСТУПОВ */}
-        <section className="mb-12 sm:mb-20 bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-3xl p-6 sm:p-8 w-full">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10">Почему студенты выбирают StuDo?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full">
-            {[
-              { icon: <Bot size={22} />, title: 'Контекстный AI', desc: 'Каждая задача хранит отдельную историю чата. Ассистент помнит ваши формулы, заметки и стиль общения.' },
-              { icon: <Bell size={22} />, title: 'Telegram-уведомления', desc: 'Привяжите @username и получайте мягкие напоминания за 24ч и 2ч до дедлайна. Никакого спама.' },
-              { icon: <Calendar size={22} />, title: 'Умные дедлайны', desc: 'Система подсвечивает просроченные задачи, предлагает перенести загрузку и автоматически сортирует список по срочности.' },
-              { icon: <BarChart3 size={22} />, title: 'Прогресс по предметам', desc: 'Визуальная шкала успеваемости. Закрытие задач автоматически повышает процент готовности к экзамену.' },
-              { icon: <ShieldCheck size={22} />, title: 'Приватность и контроль', desc: 'JWT-аутентификация, шифрование сессий. Вы решаете, какие данные хранить, а какие очищать.' },
-              { icon: <Smartphone size={22} />, title: 'Работает везде', desc: 'Адаптивный интерфейс, поддержка свайпов, быстрый запуск. Учитесь с телефона, планшета или ноутбука.' }
-            ].map((f, i) => (
-              <div key={i} className="p-4 sm:p-5 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 w-full">
-                <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-3 mx-auto sm:mx-0">{f.icon}</div>
-                <h3 className="text-base sm:text-lg font-bold mb-1.5 sm:mb-2 text-center sm:text-left">{f.title}</h3>
-                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed text-center sm:text-left">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+      {/* 🔹 Live Stats */}
+      <LiveStats />
 
-        {/* ДЕТАЛИ */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-20 w-full">
-          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-sm w-full">
-            <div className="flex items-center gap-3 mb-4">
-              <Sparkles className="text-amber-500 shrink-0" />
-              <h3 className="text-lg sm:text-xl font-bold">AI, который учится вместе с вами</h3>
+      {/* 🔹 Features Carousel */}
+      <section className="py-12 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Возможности платформы</h2>
+          <p className="text-center text-gray-500 mb-8 max-w-lg mx-auto">Всё необходимое для эффективного обучения и управления учебным процессом</p>
+          <ScaleCarousel />
+        </div>
+      </section>
+
+      {/* 🔹 How it works */}
+      <section className="py-16 px-4 bg-gradient-to-b from-transparent to-indigo-50/50">
+        <div className="max-w-5xl mx-auto text-center mb-12">
+          <h2 className="text-3xl font-bold text-slate-800 mb-4">Как это работает</h2>
+          <p className="text-gray-500">Три простых шага к продуктивности</p>
+        </div>
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+          {[
+            { step: "01", title: "Создай задачу", desc: "Введи название или опиши проект текстом. ИИ поймёт контекст и приоритеты." },
+            { step: "02", title: "ИИ разобьёт на шаги", desc: "Автоматическая декомпозиция, расстановка дедлайнов и подзадач." },
+            { step: "03", title: "Отслеживай прогресс", desc: "Визуальные отчёты, напоминания в Telegram и аналитика для ментора." }
+          ].map((item, i) => (
+            <div key={i} className="relative bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group text-center">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md z-10">{item.step}</div>
+              <h3 className="mt-4 text-xl font-semibold text-slate-800 mb-2">{item.title}</h3>
+              <p className="text-gray-500 text-sm">{item.desc}</p>
             </div>
-            <ul className="space-y-2.5 sm:space-y-3">
-              {[
-                'Изолированная память: чат не смешивается между задачами',
-                'Поддержка Markdown: формулы, списки, код, цитаты',
-                'Генерация чек-листов по темам и методичкам',
-                'Режим "Объясни как 5-летнему" для сложных тем'
-              ].map((t, i) => (
-                <li key={i} className="flex items-start gap-2 text-gray-700 text-sm sm:text-base">
-                  <CheckCircle size={16} className="text-green-500 mt-1 shrink-0" />
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          ))}
+        </div>
+      </section>
 
-          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200 shadow-sm w-full">
-            <div className="flex items-center gap-3 mb-4">
-              <MessageSquare className="text-blue-500 shrink-0" />
-              <h3 className="text-lg sm:text-xl font-bold">Интеграция с Telegram</h3>
-            </div>
-            <ul className="space-y-2.5 sm:space-y-3">
-              {['Введите @username в профиле — бот запомнит вас',
-                'Уведомления приходят только когда они нужны',
-                'Переключатель `notifications` в один клик',
-                'Возможность отписаться или изменить частоту'
-              ].map((t, i) => (
-                <li key={i} className="flex items-start gap-2 text-gray-700 text-sm sm:text-base">
-                  <CheckCircle size={16} className="text-blue-500 mt-1 shrink-0" />
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="text-center bg-gradient-to-br from-indigo-900 to-blue-900 rounded-2xl sm:rounded-3xl p-8 sm:p-10 text-white w-full">
-          <Clock size={32} className="mx-auto mb-4 text-indigo-200" />
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Хватит терять баллы из-за забытых дедлайнов</h2>
-          <p className="text-indigo-200 max-w-2xl mx-auto mb-6 sm:mb-8 text-base sm:text-lg">
-            Перенесите все задачи в одно место. Пусть AI планирует, а вы — учитесь.
-          </p>
-          <button
-            onClick={handleNavigate}
-            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-indigo-900 hover:bg-gray-100 rounded-xl font-semibold transition shadow-xl text-sm sm:text-base"
-          >
-            Открыть личный кабинет <ArrowRight size={18} />
+      {/* 🔹 Final CTA (Уменьшенная карточка) */}
+      <section className="py-16 px-4 text-center">
+        <div className="max-w-xl mx-auto bg-gradient-to-br from-indigo-600 to-blue-600 p-6 md:p-8 rounded-2xl text-white shadow-xl shadow-indigo-200/50">
+          <h2 className="text-2xl font-bold mb-3">Готов взять учёбу под контроль?</h2>
+          <p className="text-indigo-100 mb-6 text-sm">Присоединяйся к StuDo сегодня. Регистрация бесплатна, а первые задачи создаются за 30 секунд.</p>
+          <button onClick={() => navigate('/student/tasks')} className="px-6 py-2.5 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md flex items-center gap-2 mx-auto text-sm">
+            Создать аккаунт <ArrowRight size={16} />
           </button>
-          <p className="mt-4 text-xs text-indigo-300">Регистрация занимает 30 секунд. Данные защищены.</p>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

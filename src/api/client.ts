@@ -67,6 +67,15 @@ export async function changeUserRole(userId: string, role: 'student' | 'mentor')
 	});
 }
 
+export async function getPublicStats() {
+	return apiFetch<{
+		totalTasks: number;
+		completedTasks: number;
+		activeUsers: number;
+		aiRequestsToday: number;
+	}>('/api/Stats/public');
+}
+
 export async function logAiRequest(data: {
 	model: string;
 	promptTokens?: number;

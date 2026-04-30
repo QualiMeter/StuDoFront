@@ -11,6 +11,10 @@ import { AdminLayout } from './components/AdminLayout';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminUsers } from './components/AdminUsers';
 import type { UserRole } from './types';
+import { MentorDashboard } from './components/MentorDashboard';
+import { MentorLayout } from './components/MentorLayout';
+import { MentorStudents } from './components/MentorStudents';
+import { MentorTaskReview } from './components/MentorTaskReview';
 
 // Компонент для защиты ролей
 function RoleGuard({ allowedRoles, children }: { allowedRoles: UserRole[]; children: React.ReactNode }) {
@@ -34,6 +38,14 @@ function AppContent() {
           <Route path="/student/tasks/:id" element={<TaskPage />} />
           <Route path="/student/courses" element={<CoursesPage />} />
           <Route path="/student/profile" element={<ProfilePage />} />
+        </Route>
+
+        <Route element={<RoleGuard allowedRoles={['mentor']}><MentorLayout /></RoleGuard>}>
+          <Route index path="/mentor" element={<Navigate to="/mentor/dashboard" replace />} />
+          <Route path="/mentor/dashboard" element={<MentorDashboard />} />
+          <Route path="/mentor/students" element={<MentorStudents />} />
+          <Route path="/mentor/review" element={<MentorTaskReview />} />
+          <Route path="/mentor/profile" element={<ProfilePage />} />
         </Route>
 
         <Route path="/admin" element={<RoleGuard allowedRoles={['admin']}><AdminLayout /></RoleGuard>}>

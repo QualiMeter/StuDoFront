@@ -60,6 +60,13 @@ export async function getAdminRoles() { return apiFetch('/api/Admin/analytics/ro
 export async function banUser(id: string, reason: string) { return apiFetch(`/api/Admin/users/${id}/ban`, { method: 'PUT', body: JSON.stringify({ reason }) }); }
 export async function unbanUser(id: string) { return apiFetch(`/api/Admin/users/${id}/unban`, { method: 'PUT' }); }
 
+export async function changeUserRole(userId: string, role: 'student' | 'mentor') {
+	return apiFetch(`/api/Admin/users/${userId}/role`, {
+		method: 'PUT',
+		body: role
+	});
+}
+
 export async function logAiRequest(data: {
 	model: string;
 	promptTokens?: number;

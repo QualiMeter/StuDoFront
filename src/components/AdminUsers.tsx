@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAdminUsers, banUser, unbanUser } from '../api/client';
+import { getAdminUsers, banUser, unbanUser, changeUserRole } from '../api/client';
 import type { User } from '../types';
 import { Search, ArrowUpDown, ShieldBan, ShieldCheck, Bell, Send } from 'lucide-react';
 
@@ -11,7 +11,10 @@ export function AdminUsers() {
 
 	useEffect(() => {
 		const t = setTimeout(async () => {
-			try { setUsers((await getAdminUsers(search, 1)).users); } catch { }
+			try {
+				const { users } = await getAdminUsers(search, 1);
+				setUsers(users);
+			} catch { }
 			finally { setLoading(false); }
 		}, 300);
 		return () => clearTimeout(t);
@@ -19,7 +22,7 @@ export function AdminUsers() {
 
 	const handleBan = async (id: string) => {
 		const r = prompt('Причина блокировки:') || 'Забанен';
-		setActionLoading(id);
+		setActionLoading(`ban-${id}`);
 		try {
 			await banUser(id, r);
 			setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: true, banReason: r } : u));
@@ -27,14 +30,43 @@ export function AdminUsers() {
 	};
 
 	const handleUnban = async (id: string) => {
-		setActionLoading(id);
+		setActionLoading(`ban-${id}`);
 		try {
 			await unbanUser(id);
 			setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: false, banReason: null } : u));
 		} finally { setActionLoading(null); }
 	};
 
+	const handleToggleRole = async (id: string, currentRole: string) => {
+		const newRole = currentRole === 'mentor' ? 'student' : 'mentor';
+		setActionLoading(`role-${id}`);
+		try {
+			await changeUserRole(id, newRole);
+			setUsers(prev => prev.map(u => u.id === id ? { ...u, role: newRole as User['role'] } : u));
+		} catch (err) {
+			console.error('Failed to change role:', err);
+		} finally {
+			setActionLoading(null);
+		}
+	};
+
 	if (loading) return <div className="flex justify-center pt-10 text-gray-500">Загрузка...</div>;
+
+	const getRoleBadge = (role: string) => {
+		switch (role) {
+			case 'admin': return 'bg-purple-100 text-purple-700';
+			case 'mentor': return 'bg-amber-100 text-amber-700';
+			default: return 'bg-blue-100 text-blue-700';
+		}
+	};
+
+	const getRoleLabel = (role: string) => {
+		switch (role) {
+			case 'admin': return 'Админ';
+			case 'mentor': return 'Ментор';
+			default: return 'Студент';
+		}
+	};
 
 	return (
 		<div className="max-w-7xl mx-auto space-y-6">
@@ -48,7 +80,7 @@ export function AdminUsers() {
 
 			<div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 				<div className="overflow-x-auto">
-					<table className="w-full text-left text-sm min-w-[900px]">
+					<table className="w-full text-left text-sm min-w-[1100px]">
 						<thead className="bg-gray-50 border-b border-gray-200">
 							<tr>
 								<th className="px-4 py-3 font-medium text-gray-600 flex items-center gap-1">Пользователь <ArrowUpDown size={12} /></th>
@@ -68,8 +100,8 @@ export function AdminUsers() {
 									</td>
 									<td className="px-4 py-3 text-gray-600">{u.email}</td>
 									<td className="px-4 py-3">
-										<span className={`px-2 py-1 rounded-lg text-xs font-medium ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-											{u.role === 'admin' ? 'Админ' : 'Студент'}
+										<span className={`px-2 py-1 rounded-lg text-xs font-medium ${getRoleBadge(u.role)}`}>
+											{getRoleLabel(u.role)}
 										</span>
 									</td>
 									<td className="px-4 py-3">
@@ -95,11 +127,22 @@ export function AdminUsers() {
 									</td>
 									<td className="px-4 py-3">
 										{u.role === 'admin' ? (
-											<span className="text-xs text-gray-400 italic">Недоступно</span>
-										) : u.isBanned ? (
-											<button onClick={() => handleUnban(u.id)} disabled={actionLoading === u.id} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50">Разбанить</button>
+											<span className="text-xs text-gray-400 italic">Системная роль</span>
 										) : (
-											<button onClick={() => handleBan(u.id)} disabled={actionLoading === u.id} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50">Забанить</button>
+											<div className="flex flex-wrap gap-2">
+												<button
+													onClick={() => handleToggleRole(u.id, u.role)}
+													disabled={actionLoading === `role-${u.id}`}
+													className={`px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50 ${u.role === 'mentor' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-amber-500 hover:bg-amber-600 text-white'}`}
+												>
+													{u.role === 'mentor' ? 'Сделать студентом' : 'Сделать ментором'}
+												</button>
+												{u.isBanned ? (
+													<button onClick={() => handleUnban(u.id)} disabled={actionLoading === `ban-${u.id}`} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50">Разбанить</button>
+												) : (
+													<button onClick={() => handleBan(u.id)} disabled={actionLoading === `ban-${u.id}`} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50">Забанить</button>
+												)}
+											</div>
 										)}
 									</td>
 								</tr>

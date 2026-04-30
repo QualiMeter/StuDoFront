@@ -5,7 +5,6 @@ import { CheckCircle2, XCircle, Clock, MessageSquare, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function MentorTaskReview() {
-	const navigate = useNavigate();
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [filter, setFilter] = useState<'all' | 'review' | 'approved' | 'rejected'>('all');
 	const [loading, setLoading] = useState(true);

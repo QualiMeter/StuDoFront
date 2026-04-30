@@ -1,6 +1,6 @@
 import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, User, LogOut, ChevronDown, Users, ClipboardCheck, BarChart3 } from 'lucide-react';
+import { User, LogOut, ChevronDown, Users, ClipboardCheck, BarChart3 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useClickOutside } from '../hooks/useClickOutside';
 

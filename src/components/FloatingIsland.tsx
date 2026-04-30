@@ -1,15 +1,29 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useClickOutside } from '../hooks/useClickOutside';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, LogOut, ChevronDown, ArrowRight, Mail, Lock, LayoutDashboard } from 'lucide-react';
 
 export function FloatingIsland() {
 	const { user, isAuthenticated, logout, login, register } = useAuth();
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 	const containerRef = useRef<HTMLDivElement>(null);
+
+	// 🔥 Автоматически открываем вкладку регистрации при переходе с лендинга
+	useEffect(() => {
+		const showAuth = searchParams.get('showAuth');
+		if (showAuth === 'register' && !isAuthenticated) {
+			setActiveTab('register');
+			setShowTooltip(true);
+			// Убираем параметр из URL, чтобы при обновлении страницы форма не открывалась снова
+			const newParams = new URLSearchParams(searchParams);
+			newParams.delete('showAuth');
+			navigate({ search: newParams.toString() }, { replace: true });
+		}
+	}, [searchParams, isAuthenticated, navigate]);
 
 	useClickOutside(containerRef, () => setShowTooltip(false));
 

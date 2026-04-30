@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getStudents } from '../api/client';
+import { getMentorStudents } from '../api/client';
 import type { User } from '../types';
 import { Search, UserPlus, MessageSquare, BarChart2 } from 'lucide-react';
 
@@ -11,10 +11,15 @@ export function MentorStudents() {
 	useEffect(() => {
 		const t = setTimeout(async () => {
 			try {
-				const { users } = await getStudents();
-				setStudents(users);
-			} catch { }
-			finally { setLoading(false); }
+				const data = await getMentorStudents(search, 1, 50);
+				const list = Array.isArray(data) ? data : (data as any).users || [];
+				setStudents(list);
+			} catch (err) {
+				console.error('Failed to load mentor students:', err);
+				setStudents([]);
+			} finally {
+				setLoading(false);
+			}
 		}, 300);
 		return () => clearTimeout(t);
 	}, [search]);
@@ -36,7 +41,7 @@ export function MentorStudents() {
 					<div key={s.id} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition flex flex-col gap-3">
 						<div className="flex items-start justify-between">
 							<div className="flex items-center gap-3">
-								<div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-medium text-sm">{s.name[0]}{s.surname[0]}</div>
+								<div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-medium text-sm">{s.name?.[0] || '?'}{s.surname?.[0] || '?'}</div>
 								<div>
 									<h3 className="font-semibold text-slate-800">{s.surname} {s.name}</h3>
 									<p className="text-xs text-gray-500">{s.email}</p>

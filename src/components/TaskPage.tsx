@@ -14,13 +14,11 @@ export function TaskPage() {
 	const [subtasks, setSubtasks] = useState<SubtaskWithStatus[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	// 🔹 Edit Drawer State
 	const [isEditOpen, setIsEditOpen] = useState(false);
 	const [editingSub, setEditingSub] = useState<SubtaskWithStatus | null>(null);
 	const [editForm, setEditForm] = useState({ title: '' });
 	const [editLoading, setEditLoading] = useState(false);
 
-	// 🔹 AI Chat State
 	const [isAiOpen, setIsAiOpen] = useState(false);
 	const [aiMessages, setAiMessages] = useState<{ id: string; role: string; content: string; proposal?: any }[]>([]);
 	const [aiInput, setAiInput] = useState('');
@@ -90,7 +88,6 @@ export function TaskPage() {
 
 	useEffect(() => { aiEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [aiMessages, pendingProposal]);
 
-	// 🔹 Локальный Drag & Drop (без запросов к серверу)
 	const handleDragEnd = (result: DropResult) => {
 		const { source, destination, draggableId } = result;
 		if (!destination) return;
@@ -104,7 +101,6 @@ export function TaskPage() {
 		));
 	};
 
-	// 🔹 Редактирование подзадачи
 	const openEditDrawer = (sub: SubtaskWithStatus) => {
 		setEditingSub(sub);
 		setEditForm({ title: sub.title || '' });
@@ -139,7 +135,6 @@ export function TaskPage() {
 		} catch (err) { console.error(err); }
 	};
 
-	// 🔹 AI Handlers (без изменений)
 	const handleAiSend = async () => {
 		if (!aiInput.trim() || aiLoading || pendingProposal || !apiKey) return;
 		const userMsg = { id: crypto.randomUUID(), role: 'user', content: aiInput };

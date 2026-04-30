@@ -29,10 +29,8 @@ function RoleGuard({ allowedRoles, children }: { allowedRoles: UserRole[]; child
 
 function AppContent() {
   return (
-    // Убран глобальный отступ pt-20, так как FloatingIsland теперь только на /
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/40">
       <Routes>
-        {/* 🔹 FloatingIsland рендерится ТОЛЬКО здесь */}
         <Route path="/" element={
           <>
             <FloatingIsland />

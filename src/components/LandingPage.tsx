@@ -4,7 +4,48 @@ import { ScaleCarousel } from './ScaleCarousel';
 import { LiveStats } from './LiveStats';
 import { ArrowRight, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { AuthForm } from './FloatingIsland'; // Используем ту же форму, что и в FloatingIsland
+
+// Простая форма авторизации для лендинга (дублирует логику FloatingIsland)
+function LandingAuthForm({ activeTab, onSubmit, onClose }: { activeTab: 'login' | 'register'; onSubmit: any; onClose: () => void }) {
+  const [form, setForm] = useState({ email: '', password: '', name: '', surname: '', patronym: '', birthDate: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); setError(''); setLoading(true);
+    try {
+      if (activeTab === 'login') await onSubmit(form.email, form.password);
+      else await onSubmit({ ...form, birthDate: form.birthDate || null, patronym: form.patronym || null, timezone: form.timezone || null });
+      onClose(); // Закрываем модалку после успеха
+    } catch (err: any) { setError(err.message || 'Ошибка'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {activeTab === 'register' && (
+        <div className="grid grid-cols-2 gap-2">
+          <input required placeholder="Фамилия" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.surname} onChange={e => setForm({ ...form, surname: e.target.value })} />
+          <input required placeholder="Имя" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <input placeholder="Отчество" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.patronym} onChange={e => setForm({ ...form, patronym: e.target.value })} />
+          <input type="date" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} />
+        </div>
+      )}
+      <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 focus-within:ring-1 focus-within:ring-indigo-500/40">
+        <span className="text-gray-400 shrink-0">@</span>
+        <input required type="email" placeholder="Email" className="w-full p-2.5 text-sm bg-transparent outline-none" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+      </div>
+      <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 focus-within:ring-1 focus-within:ring-indigo-500/40">
+        <span className="text-gray-400 shrink-0">🔒</span>
+        <input required type="password" placeholder="Пароль" className="w-full p-2.5 text-sm bg-transparent outline-none" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+      </div>
+      {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+      <button type="submit" disabled={loading} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 shadow-md shadow-indigo-200/50">
+        {loading ? 'Загрузка...' : activeTab === 'login' ? 'Войти' : 'Создать аккаунт'} <ArrowRight size={14} />
+      </button>
+    </form>
+  );
+}
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -12,11 +53,20 @@ export function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
 
-  const handleActionClick = (action: 'start' | 'register') => {
+  const handleStartClick = () => {
     if (isAuthenticated) {
       navigate('/student/tasks');
     } else {
-      setActiveTab(action === 'register' ? 'register' : 'login');
+      setActiveTab('login');
+      setShowAuthModal(true);
+    }
+  };
+
+  const handleRegisterClick = () => {
+    if (isAuthenticated) {
+      navigate('/student/tasks');
+    } else {
+      setActiveTab('register');
       setShowAuthModal(true);
     }
   };
@@ -40,18 +90,12 @@ export function LandingPage() {
             StuDo автоматически разбивает сложные задачи на шаги, отслеживает прогресс и синхронизирует уведомления с Telegram. Создан для студентов, оптимизирован для менторов.
           </p>
 
-          {/* 🔹 Кнопки с проверкой авторизации */}
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => handleActionClick('start')}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2"
-            >
+          {/* 🔹 Кнопки */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onClick={handleStartClick} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2">
               Начать использовать <ArrowRight size={18} />
             </button>
-            <button
-              onClick={() => handleActionClick('register')}
-              className="px-6 py-3 bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 rounded-xl font-medium transition shadow-sm"
-            >
+            <button onClick={handleRegisterClick} className="px-6 py-3 bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 rounded-xl font-medium transition shadow-sm">
               Создать аккаунт
             </button>
           </div>
@@ -92,15 +136,12 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 🔹 Final CTA (Компактная версия) */}
+      {/* 🔹 Final CTA */}
       <section className="py-12 px-4 text-center">
         <div className="max-w-lg mx-auto bg-gradient-to-br from-indigo-600 to-blue-600 p-5 rounded-2xl text-white shadow-xl shadow-indigo-200/50">
           <h2 className="text-xl font-bold mb-2">Готов взять учёбу под контроль?</h2>
           <p className="text-indigo-100 mb-4 text-sm opacity-90">Присоединяйся к StuDo сегодня. Регистрация бесплатна.</p>
-          <button
-            onClick={() => handleActionClick('start')}
-            className="w-full sm:w-auto px-6 py-2 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md inline-flex items-center justify-center gap-2 text-sm"
-          >
+          <button onClick={handleStartClick} className="w-full sm:w-auto px-6 py-2 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md inline-flex items-center justify-center gap-2 text-sm">
             Создать аккаунт <ArrowRight size={16} />
           </button>
         </div>
@@ -120,7 +161,7 @@ export function LandingPage() {
                 <button onClick={() => setActiveTab('login')} className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${activeTab === 'login' ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'}`}>Вход</button>
                 <button onClick={() => setActiveTab('register')} className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${activeTab === 'register' ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'}`}>Регистрация</button>
               </div>
-              <AuthForm activeTab={activeTab} onSubmit={activeTab === 'login' ? login : register} />
+              <LandingAuthForm activeTab={activeTab} onSubmit={activeTab === 'login' ? login : register} onClose={() => setShowAuthModal(false)} />
             </div>
           </div>
         </div>

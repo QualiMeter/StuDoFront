@@ -1,14 +1,30 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScaleCarousel } from './ScaleCarousel';
 import { LiveStats } from './LiveStats';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { AuthForm } from './FloatingIsland'; // Используем ту же форму, что и в FloatingIsland
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated, login, register } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+
+  const handleActionClick = (action: 'start' | 'register') => {
+    if (isAuthenticated) {
+      navigate('/student/tasks');
+    } else {
+      setActiveTab(action === 'register' ? 'register' : 'login');
+      setShowAuthModal(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-white overflow-hidden">
 
+      {/* 🔹 Hero Section */}
       <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium mb-6">
@@ -23,20 +39,30 @@ export function LandingPage() {
           <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
             StuDo автоматически разбивает сложные задачи на шаги, отслеживает прогресс и синхронизирует уведомления с Telegram. Создан для студентов, оптимизирован для менторов.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button onClick={() => navigate('/student/tasks')} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2">
+
+          {/* 🔹 Кнопки с проверкой авторизации */}
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => handleActionClick('start')}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2"
+            >
               Начать использовать <ArrowRight size={18} />
             </button>
-            <button className="px-6 py-3 bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 rounded-xl font-medium transition shadow-sm">
-              Смотреть демо
+            <button
+              onClick={() => handleActionClick('register')}
+              className="px-6 py-3 bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 rounded-xl font-medium transition shadow-sm"
+            >
+              Создать аккаунт
             </button>
           </div>
         </div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl -z-10 pointer-events-none" />
       </section>
 
+      {/* 🔹 Live Stats */}
       <LiveStats />
 
+      {/* 🔹 Features Carousel */}
       <section className="py-12 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Возможности платформы</h2>
@@ -45,6 +71,7 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* 🔹 How it works */}
       <section className="py-14 px-4 bg-gradient-to-b from-transparent to-indigo-50/50">
         <div className="max-w-5xl mx-auto text-center mb-10">
           <h2 className="text-3xl font-bold text-slate-800 mb-3">Как это работает</h2>
@@ -65,15 +92,39 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* 🔹 Final CTA (Компактная версия) */}
       <section className="py-12 px-4 text-center">
         <div className="max-w-lg mx-auto bg-gradient-to-br from-indigo-600 to-blue-600 p-5 rounded-2xl text-white shadow-xl shadow-indigo-200/50">
           <h2 className="text-xl font-bold mb-2">Готов взять учёбу под контроль?</h2>
           <p className="text-indigo-100 mb-4 text-sm opacity-90">Присоединяйся к StuDo сегодня. Регистрация бесплатна.</p>
-          <button onClick={() => navigate('/student/tasks')} className="w-full sm:w-auto px-6 py-2 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md inline-flex items-center justify-center gap-2 text-sm">
+          <button
+            onClick={() => handleActionClick('start')}
+            className="w-full sm:w-auto px-6 py-2 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md inline-flex items-center justify-center gap-2 text-sm"
+          >
             Создать аккаунт <ArrowRight size={16} />
           </button>
         </div>
       </section>
+
+      {/* 🔹 Модалка авторизации */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0">
+              <h3 className="font-bold text-gray-800">Вход в StuDo</h3>
+              <button onClick={() => setShowAuthModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition"><X size={18} className="text-gray-500" /></button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <div className="relative flex bg-gray-100 rounded-xl p-1 mb-6">
+                <div className={`absolute inset-y-1 left-1 w-[calc(50%-8px)] bg-white rounded-lg shadow-sm transition-transform duration-200 ease-out ${activeTab === 'login' ? 'translate-x-0' : 'translate-x-[calc(100%+8px)]'}`} />
+                <button onClick={() => setActiveTab('login')} className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${activeTab === 'login' ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'}`}>Вход</button>
+                <button onClick={() => setActiveTab('register')} className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${activeTab === 'register' ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'}`}>Регистрация</button>
+              </div>
+              <AuthForm activeTab={activeTab} onSubmit={activeTab === 'login' ? login : register} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

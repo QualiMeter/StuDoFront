@@ -124,8 +124,7 @@ export function FloatingIsland() {
 	);
 }
 
-// Форма авторизации/регистрации
-function AuthForm({ activeTab, onSubmit }: { activeTab: 'login' | 'register'; onSubmit: any }) {
+export function AuthForm({ activeTab, onSubmit }: { activeTab: 'login' | 'register'; onSubmit: any }) {
 	const [form, setForm] = useState({ email: '', password: '', name: '', surname: '', patronym: '', birthDate: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);

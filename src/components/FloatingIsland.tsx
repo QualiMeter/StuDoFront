@@ -36,7 +36,11 @@ export function FloatingIsland() {
 					</button>
 
 					<div ref={containerRef} className="relative">
-						<button onClick={toggleTooltip} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition text-sm font-medium shadow-md shadow-indigo-200">
+						<button
+							id="floating-island-login-btn"
+							onClick={toggleTooltip}
+							className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition text-sm font-medium shadow-md shadow-indigo-200"
+						>
 							<User size={16} /> Войти
 						</button>
 

@@ -1,73 +1,25 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScaleCarousel } from './ScaleCarousel';
 import { LiveStats } from './LiveStats';
-import { ArrowRight, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-// Простая форма авторизации для лендинга (дублирует логику FloatingIsland)
-function LandingAuthForm({ activeTab, onSubmit, onClose }: { activeTab: 'login' | 'register'; onSubmit: any; onClose: () => void }) {
-  const [form, setForm] = useState({ email: '', password: '', name: '', surname: '', patronym: '', birthDate: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(''); setLoading(true);
-    try {
-      if (activeTab === 'login') await onSubmit(form.email, form.password);
-      else await onSubmit({ ...form, birthDate: form.birthDate || null, patronym: form.patronym || null, timezone: form.timezone || null });
-      onClose(); // Закрываем модалку после успеха
-    } catch (err: any) { setError(err.message || 'Ошибка'); }
-    finally { setLoading(false); }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      {activeTab === 'register' && (
-        <div className="grid grid-cols-2 gap-2">
-          <input required placeholder="Фамилия" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.surname} onChange={e => setForm({ ...form, surname: e.target.value })} />
-          <input required placeholder="Имя" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-          <input placeholder="Отчество" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.patronym} onChange={e => setForm({ ...form, patronym: e.target.value })} />
-          <input type="date" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} />
-        </div>
-      )}
-      <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 focus-within:ring-1 focus-within:ring-indigo-500/40">
-        <span className="text-gray-400 shrink-0">@</span>
-        <input required type="email" placeholder="Email" className="w-full p-2.5 text-sm bg-transparent outline-none" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-      </div>
-      <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 focus-within:ring-1 focus-within:ring-indigo-500/40">
-        <span className="text-gray-400 shrink-0">🔒</span>
-        <input required type="password" placeholder="Пароль" className="w-full p-2.5 text-sm bg-transparent outline-none" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-      </div>
-      {error && <p className="text-red-500 text-xs text-center">{error}</p>}
-      <button type="submit" disabled={loading} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 shadow-md shadow-indigo-200/50">
-        {loading ? 'Загрузка...' : activeTab === 'login' ? 'Войти' : 'Создать аккаунт'} <ArrowRight size={14} />
-      </button>
-    </form>
-  );
-}
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, login, register } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const { isAuthenticated } = useAuth();
 
   const handleStartClick = () => {
     if (isAuthenticated) {
       navigate('/student/tasks');
     } else {
-      setActiveTab('login');
-      setShowAuthModal(true);
-    }
-  };
+      // Ищем кнопку входа в FloatingIsland по ID
+      const loginBtn = document.getElementById('floating-island-login-btn') as HTMLButtonElement;
 
-  const handleRegisterClick = () => {
-    if (isAuthenticated) {
-      navigate('/student/tasks');
-    } else {
-      setActiveTab('register');
-      setShowAuthModal(true);
+      if (loginBtn) {
+        loginBtn.click();
+      } else {
+        console.error('Кнопка входа не найдена. Убедитесь, что FloatingIsland отрендерен.');
+      }
     }
   };
 
@@ -90,13 +42,13 @@ export function LandingPage() {
             StuDo автоматически разбивает сложные задачи на шаги, отслеживает прогресс и синхронизирует уведомления с Telegram. Создан для студентов, оптимизирован для менторов.
           </p>
 
-          {/* 🔹 Кнопки */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button onClick={handleStartClick} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2">
+          {/* 🔹 Кнопка действия */}
+          <div className="flex justify-center">
+            <button
+              onClick={handleStartClick}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition shadow-lg shadow-indigo-200/50 flex items-center gap-2"
+            >
               Начать использовать <ArrowRight size={18} />
-            </button>
-            <button onClick={handleRegisterClick} className="px-6 py-3 bg-white hover:bg-gray-50 text-slate-700 border border-gray-200 rounded-xl font-medium transition shadow-sm">
-              Создать аккаунт
             </button>
           </div>
         </div>
@@ -141,31 +93,14 @@ export function LandingPage() {
         <div className="max-w-lg mx-auto bg-gradient-to-br from-indigo-600 to-blue-600 p-5 rounded-2xl text-white shadow-xl shadow-indigo-200/50">
           <h2 className="text-xl font-bold mb-2">Готов взять учёбу под контроль?</h2>
           <p className="text-indigo-100 mb-4 text-sm opacity-90">Присоединяйся к StuDo сегодня. Регистрация бесплатна.</p>
-          <button onClick={handleStartClick} className="w-full sm:w-auto px-6 py-2 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md inline-flex items-center justify-center gap-2 text-sm">
-            Создать аккаунт <ArrowRight size={16} />
+          <button
+            onClick={handleStartClick}
+            className="w-full sm:w-auto px-6 py-2 bg-white text-indigo-600 hover:bg-gray-100 rounded-lg font-semibold transition shadow-md inline-flex items-center justify-center gap-2 text-sm"
+          >
+            Начать сейчас <ArrowRight size={16} />
           </button>
         </div>
       </section>
-
-      {/* 🔹 Модалка авторизации */}
-      {showAuthModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0">
-              <h3 className="font-bold text-gray-800">Вход в StuDo</h3>
-              <button onClick={() => setShowAuthModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition"><X size={18} className="text-gray-500" /></button>
-            </div>
-            <div className="p-6 overflow-y-auto">
-              <div className="relative flex bg-gray-100 rounded-xl p-1 mb-6">
-                <div className={`absolute inset-y-1 left-1 w-[calc(50%-8px)] bg-white rounded-lg shadow-sm transition-transform duration-200 ease-out ${activeTab === 'login' ? 'translate-x-0' : 'translate-x-[calc(100%+8px)]'}`} />
-                <button onClick={() => setActiveTab('login')} className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${activeTab === 'login' ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'}`}>Вход</button>
-                <button onClick={() => setActiveTab('register')} className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors ${activeTab === 'register' ? 'text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-700'}`}>Регистрация</button>
-              </div>
-              <LandingAuthForm activeTab={activeTab} onSubmit={activeTab === 'login' ? login : register} onClose={() => setShowAuthModal(false)} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

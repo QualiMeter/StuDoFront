@@ -9,7 +9,7 @@ export default defineConfig({
 		tailwindcss(),
 		VitePWA({
 			workbox: {
-				navigateFallback: '/index.html',
+				navigateFallback: '/offline.html',
 				navigateFallbackAllowlist: [/^\/.*$/],
 				globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
 				cleanupOutdatedCaches: true,

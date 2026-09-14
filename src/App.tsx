@@ -61,7 +61,7 @@ function AppContent() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="/*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );

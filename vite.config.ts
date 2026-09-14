@@ -11,18 +11,18 @@ export default defineConfig({
 		VitePWA({
 			registerType: 'autoUpdate',
 			manifest: {
-				name: 'My App',
-				short_name: 'App',
+				name: 'StuDo',
+				short_name: 'StuDo',
 				theme_color: '#ffffff'
 			},
 			workbox: {
 				navigateFallback: '/offline.html',
 				runtimeCaching: [
-				{
-					urlPattern: /^https:\/\/.*/,
-					handler: 'NetworkFirst',
-					options: { cacheName: 'pages' }
-				}]
+					{
+						urlPattern: /^https:\/\/.*/,
+						handler: 'StaleWhileRevalidate',
+						options: { cacheName: 'pages' }
+					}]
 			}
 		})
 	],

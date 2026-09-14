@@ -9,7 +9,7 @@ export default defineConfig({
 		tailwindcss(),
 		VitePWA({
 			workbox: {
-				navigateFallback: '/public/offline.html',
+				navigateFallback: '/offline.html',
 				navigateFallbackDenylist: [/^\/api\//],
 				runtimeCaching: [
 					{

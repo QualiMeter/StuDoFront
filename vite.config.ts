@@ -9,13 +9,13 @@ export default defineConfig({
 		tailwindcss(),
 		VitePWA({
 			workbox: {
-				navigateFallback: '/offline.html',
+				navigateFallback: '/index.html',
 				navigateFallbackAllowlist: [/^\/.*$/],
 				globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
 				cleanupOutdatedCaches: true,
 				runtimeCaching: [
 					{
-						urlPattern: /\/[^.]*$/, // Все навигационные запросы (без точки в URL)
+						urlPattern: /\/[^.]*$/,
 						handler: 'NetworkFirst',
 						options: {
 							cacheName: 'navigation',

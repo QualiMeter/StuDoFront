@@ -8,14 +8,10 @@ export default defineConfig({
 		react(),
 		tailwindcss(),
 		VitePWA({
-			includeAssets: ['offline.html'],
 			workbox: {
 				navigateFallback: '/offline.html',
 				navigateFallbackAllowlist: [/^\/.*$/],
 				globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-				additionalManifestEntries: [
-					{ url: '/offline.html', revision: null }
-				],
 				cleanupOutdatedCaches: true
 			}
 		})

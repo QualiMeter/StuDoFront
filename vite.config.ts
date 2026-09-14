@@ -9,14 +9,15 @@ export default defineConfig({
 		tailwindcss(),
 		VitePWA({
 			workbox: {
-				navigateFallback: '/index.html',
+				navigateFallback: '/public/offline.html',
 				navigateFallbackDenylist: [/^\/api\//],
 				runtimeCaching: [
 					{
 						urlPattern: /\/index\.html$/,
 						handler: 'NetworkFirst',
 						options: { cacheName: 'navigation' }
-					}],
+					}
+				],
 				cacheId: 'app',
 				cleanupOutdatedCaches: true
 			}

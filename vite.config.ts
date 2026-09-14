@@ -10,8 +10,19 @@ export default defineConfig({
 		VitePWA({
 			workbox: {
 				navigateFallback: '/offline.html',
+				navigateFallbackAllowlist: [/^\/.*$/],
 				globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-				cleanupOutdatedCaches: true
+				cleanupOutdatedCaches: true,
+				runtimeCaching: [
+					{
+						urlPattern: /\/[^.]*$/, // Все навигационные запросы (без точки в URL)
+						handler: 'NetworkFirst',
+						options: {
+							cacheName: 'navigation',
+							networkTimeoutSeconds: 3
+						}
+					}
+				]
 			}
 		})
 	],

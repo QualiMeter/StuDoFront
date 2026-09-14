@@ -8,9 +8,10 @@ export default defineConfig({
 		react(),
 		tailwindcss(),
 		VitePWA({
+			devOptions: { enabled: true },
 			workbox: {
-				navigateFallback: '/index.html',
-				navigateFallbackDenylist: [/^\/api\//],
+				navigateFallback: '/offline.html',
+				navigateFallbackAllowlist: [/^\/.*$/],
 				runtimeCaching: [
 					{
 						urlPattern: /\/index\.html$/,
@@ -18,7 +19,9 @@ export default defineConfig({
 						options: { cacheName: 'navigation' }
 					}
 				],
-				cacheId: 'app',
+				additionalManifestEntries: [
+					{ url: '/offline.html', revision: null }
+				],
 				cleanupOutdatedCaches: true
 			}
 		})
